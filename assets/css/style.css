@@ -1,0 +1,25 @@
+.header{
+	background-color: blue;
+	margin-bottom: 50px;
+	color: white;
+}
+#playerName{
+	margin-bottom: 5px;
+}
+#result{
+	height: 50px;
+	font-weight: bold;
+	font-size: 18px;
+}
+.player{
+	border: solid black 5px;
+	min-height: 500px;
+}
+.name{
+	font-weight: bold;
+	font-size: 26px;
+	margin-bottom: 35px;
+}
+.RPSimages{
+	width: 250px;
+}
