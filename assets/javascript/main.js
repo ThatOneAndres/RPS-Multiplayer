@@ -8,7 +8,7 @@
     messagingSenderId: "1009660396441"
   };
   firebase.initializeApp(config);
-
+  var playerSide;
   var database = firebase.database();
   // database.ref("inGamePlayers").set({isCalculating: false});
 function firstPlayerEnter(playerName){
@@ -26,6 +26,20 @@ function firstPlayerEnter(playerName){
 	var leftResult = $('<div class = "row" id = "leftResult">');
 	leftResult.text("Wins: 0 Ties: 0 Losses: 0 ");
 	$("#leftPlayer").append(leftResult);
+
+	var rightPlayerName = $('<div class = "row name" id = "rightName">');
+	rightPlayerName.text("Waiting For Opponent...")
+	$("#rightPlayer").append(rightPlayerName);
+
+	var rightRPSImages = $('<div class = "row right-images">');
+	rightRPSImages.append($('<img class= "RPSimages image-responsive" style = "display: none" value = "rock" src="assets/images/rock.png">'))
+	rightRPSImages.append($('<img class= "RPSimages image-responsive" style = "display: none" value = "paper" src="assets/images/paper.png">'))
+	rightRPSImages.append($('<img class= "RPSimages image-responsive" style = "display: none" value = "scissors" src="assets/images/scissors.png">'))
+	$("#rightPlayer").append(rightRPSImages);
+
+	var rightResult = $('<div class = "row" style = "display: none" id = "rightResult">');
+	rightResult.text("Wins: 0 Ties: 0 Losses: 0 ");
+	$("#rightPlayer").append(rightResult);
 }
 
 function secondPlayerEnter(playerName){
@@ -43,6 +57,20 @@ function secondPlayerEnter(playerName){
 	var rightResult = $('<div class = "row" id = "rightResult">');
 	rightResult.text("Wins: 0 Ties: 0 Losses: 0 ");
 	$("#rightPlayer").append(rightResult);
+
+	var leftPlayerName = $('<div class = "row name" id = "leftName">');
+	leftPlayerName.text("Waiting For Opponent...");
+	$("#leftPlayer").append(leftPlayerName);
+
+	var leftRPSImages = $('<div class = "row left-images">');
+	leftRPSImages.append($('<img class= "RPSimages image-responsive" style = "display: none" value = "rock" src="assets/images/rock.png">'))
+	leftRPSImages.append($('<img class= "RPSimages image-responsive" style = "display: none" value = "paper" src="assets/images/paper.png">'))
+	leftRPSImages.append($('<img class= "RPSimages image-responsive" style = "display: none" value = "scissors" src="assets/images/scissors.png">'))
+	$("#leftPlayer").append(leftRPSImages);
+
+	var leftResult = $('<div class = "row" style = "display: none" id = "leftResult">');
+	leftResult.text("Wins: 0 Ties: 0 Losses: 0 ");
+	$("#leftPlayer").append(leftResult);
 
 }
 
@@ -91,8 +119,10 @@ function beginGame(){
 	database.ref("inGamePlayers").once("value").then(function(snapshot){
 		if (snapshot.val().turn%2 === 0){
 			$("#leftResult").text("Wins: "+snapshot.val().player1.wins+" Ties: "+snapshot.val().player1.ties+" Losses: "+snapshot.val().player1.losses);
+			$("#rightResult").text("Wins: "+snapshot.val().player2.wins+" Ties: "+snapshot.val().player2.ties+" Losses: "+snapshot.val().player2.losses);
+			if (playerSide === "left"){
 			$(".left-images	.RPSimages").css("display", "inline");
-			$(".left-images .RPSimages").css("border", "3px solid red");
+			$("#leftPlayer").css("border", "5px solid blue");
 				$(".left-images .RPSimages").hover(function(){
 					$(this).css("border", "3px solid yellow")
 				},function(){
@@ -100,28 +130,41 @@ function beginGame(){
 				});
 				$(".left-images").delegate(".RPSimages","click",function(){
 					database.ref("inGamePlayers/player1/choice").set($(this).attr("value"));
+					$("#leftPlayer").css("border", "5px solid black");
 					$(".left-images .RPSimages").css("display", "none");
 					$(this).css("display", "inline");
 					database.ref("inGamePlayers/turn").set(parseInt(snapshot.val().turn)+1);
 				})
+			}
 			// }		
 		}else{
+			if (playerSide === "right"){
 			$(".right-images .RPSimages").css("display", "inline");
-			$("#rightResult").text("Wins: "+snapshot.val().player2.wins+" Ties: "+snapshot.val().player2.ties+" Losses: "+snapshot.val().player2.losses);
-			$(".right-images .RPSimages").css("border", "3px solid red");
+			$("#rightPlayer").css("border", "5px solid blue");
 			$(".right-images .RPSimages").hover(function(){
 				$(this).css("border", "3px solid yellow")
 			},function(){
 				$(this).css("border", "");
 			});
+			}
 
 			$(".right-images").delegate(".RPSimages","click",function(){
 				database.ref("inGamePlayers/player2/choice").set($(this).attr("value"));
+				$("#rightPlayer").css("border", "5px solid black");
 				$(".right-images .RPSimages").css("display", "none");
-				$(this).css("display", "inline");
-				checkWinner(snapshot,$(this).attr("value"));
+				// $(this).css("display", "inline");
+				setTimeout(function(){
+					database.ref("inGamePlayers").once("value").then(function(newSnapshot){
+						console.log(newSnapshot.val());
+						$(".right-images .RPSimages [value ='" + newSnapshot.val().player2.choice+"']").css("display", "inline");
 
-				database.ref("inGamePlayers/turn").set(parseInt(snapshot.val().turn)+1);
+						checkWinner(snapshot,newSnapshot.val().player2.choice);
+						$(this).css("display","none");
+						database.ref("inGamePlayers/turn").set(parseInt(snapshot.val().turn)+1);
+					})
+				},3000);
+				
+
 			})
 		}
 	});
@@ -151,6 +194,7 @@ $(document).ready(function(){
 
 		database.ref("inGamePlayers").once("value").then(function(snapshot){
 			if (snapshot.numChildren() === 0){
+				playerSide = "left";
 				firstPlayerEnter(playerName);
 				database.ref("inGamePlayers/player1").set({
 					name: playerName,
@@ -162,6 +206,7 @@ $(document).ready(function(){
 				});
 			}else if (snapshot.numChildren() === 1){
 				if (snapshot.val().player1 !== null){
+					playerSide = "right";
 					secondPlayerEnter(playerName);
 					database.ref("inGamePlayers/player2").set({
 						name: playerName,
@@ -170,7 +215,9 @@ $(document).ready(function(){
 						ties: 0,
 						choice: "none"
 					});
+					
 				}else{
+					playerSide = "left";
 					firstPlayerEnter(playerName);
 					database.ref("inGamePlayers/player1").set({
 						name: playerName,
@@ -178,10 +225,12 @@ $(document).ready(function(){
 						losses: 0,
 						ties:0 ,
 						choice: "none"
-						});	
+					});	
+
 				}
 				database.ref("inGamePlayers/turn").set(0);
 			}else{
+				// Eventually plan to move player from queue to inGame when one disconnects
 				database.ref("queue").set({name: playerName});
 			}
 
@@ -192,6 +241,12 @@ $(document).ready(function(){
 		database.ref("inGamePlayers/turn").on("value",function(snapshot){
 			console.log(snapshot.val());
 			if(snapshot.val() !== null){
+				database.ref("inGamePlayers").once("value").then(function(parentSnapshot){
+				$("#rightName").text(parentSnapshot.val().player2.name);
+				$("#leftName").text(parentSnapshot.val().player1.name);
+				$("#leftResult").css("display","inline");
+				$("#rightResult").css("display","inline");
+			});
 				beginGame();
 			}
 		});
