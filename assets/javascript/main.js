@@ -250,4 +250,6 @@ $(document).ready(function(){
 				beginGame();
 			}
 		});
+
+	database.ref("inGamePlayers").onDisconnect().remove();
 });
