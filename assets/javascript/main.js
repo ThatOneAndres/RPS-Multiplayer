@@ -1,46 +1,198 @@
+  // Initialize Firebase
+  var config = {
+    apiKey: "AIzaSyB5Fv4dvjSLOsw0rZ5M_91tjSJnRduPzpY",
+    authDomain: "rps-game-b3ed0.firebaseapp.com",
+    databaseURL: "https://rps-game-b3ed0.firebaseio.com",
+    projectId: "rps-game-b3ed0",
+    storageBucket: "rps-game-b3ed0.appspot.com",
+    messagingSenderId: "1009660396441"
+  };
+  firebase.initializeApp(config);
 
+  var database = firebase.database();
+  // database.ref("inGamePlayers").set({isCalculating: false});
+function firstPlayerEnter(playerName){
 
+	var leftPlayerName = $('<div class = "row name" id = "leftName">');
+	leftPlayerName.text(playerName);
+	$("#leftPlayer").append(leftPlayerName)
+
+	var leftRPSImages = $('<div class = "row left-images">');
+	leftRPSImages.append($('<img class= "RPSimages image-responsive" value = "rock" src="assets/images/rock.png">'))
+	leftRPSImages.append($('<img class= "RPSimages image-responsive" value = "paper" src="assets/images/paper.png">'))
+	leftRPSImages.append($('<img class= "RPSimages image-responsive" value = "scissors" src="assets/images/scissors.png">'))
+	$("#leftPlayer").append(leftRPSImages)
+
+	var leftResult = $('<div class = "row" id = "leftResult">');
+	leftResult.text("Wins: 0 Ties: 0 Losses: 0 ");
+	$("#leftPlayer").append(leftResult);
+}
+
+function secondPlayerEnter(playerName){
+
+	var rightPlayerName = $('<div class = "row name" id = "rightName">');
+	rightPlayerName.text(playerName);
+	$("#rightPlayer").append(rightPlayerName)
+
+	var rightRPSImages = $('<div class = "row right-images">');
+	rightRPSImages.append($('<img class= "RPSimages image-responsive" value = "rock" src="assets/images/rock.png">'))
+	rightRPSImages.append($('<img class= "RPSimages image-responsive" value = "paper" src="assets/images/paper.png">'))
+	rightRPSImages.append($('<img class= "RPSimages image-responsive" value = "scissors" src="assets/images/scissors.png">'))
+	$("#rightPlayer").append(rightRPSImages);
+
+	var rightResult = $('<div class = "row" id = "rightResult">');
+	rightResult.text("Wins: 0 Ties: 0 Losses: 0 ");
+	$("#rightPlayer").append(rightResult);
+
+}
+
+function updateResult(){
+
+}  
+
+function checkWinner(entry,player2Choice){
+	console.log("HERE");
+		console.log(entry.val().player1.choice)
+		console.log(player2Choice)
+
+		if(entry.val().player1.choice === player2Choice){
+			database.ref("inGamePlayers/player1/ties").set(parseInt(entry.val().player1.ties)+1);
+			database.ref("inGamePlayers/player2/ties").set(parseInt(entry.val().player2.ties)+1);
+
+		}
+		else if (entry.val().player1.choice === "rock" && player2Choice === "scissors"){
+			database.ref("inGamePlayers/player1/wins").set(parseInt(entry.val().player1.wins)+1);
+			database.ref("inGamePlayers/player2/losses").set(parseInt(entry.val().player2.losses)+1);
+		}
+		else if (entry.val().player1.choice === "rock" && player2Choice === "paper"){
+			database.ref("inGamePlayers/player1/losses").set(parseInt(entry.val().player1.losses)+1);
+			database.ref("inGamePlayers/player2/wins").set(parseInt(entry.val().player2.wins)+1);
+		}
+		else if (entry.val().player1.choice === "scissors" && player2Choice === "paper"){
+			database.ref("inGamePlayers/player1/wins").set(parseInt(entry.val().player1.wins)+1);
+			database.ref("inGamePlayers/player2/losses").set(parseInt(entry.val().player2.losses)+1);
+		}
+		else if (entry.val().player1.choice === "scissors" && player2Choice === "rock"){
+			database.ref("inGamePlayers/player1/losses").set(parseInt(entry.val().player1.losses)+1);
+			database.ref("inGamePlayers/player2/wins").set(parseInt(entry.val().player2.wins)+1);
+		}
+		else if (entry.val().player1.choice === "paper" && player2Choice === "rock"){
+			database.ref("inGamePlayers/player1/wins").set(parseInt(entry.val().player1.wins)+1);
+			database.ref("inGamePlayers/player2/losses").set(parseInt(entry.val().player2.losses)+1);
+		}
+		else if (entry.val().player1.choice === "paper" && player2Choice === "scissors"){
+			database.ref("inGamePlayers/player1/losses").set(parseInt(entry.val().player1.losses)+1);
+			database.ref("inGamePlayers/player2/wins").set(parseInt(entry.val().player2.wins)+1);
+		}
+}
+
+function beginGame(){
+	console.log("beginGame");
+	database.ref("inGamePlayers").once("value").then(function(snapshot){
+		if (snapshot.val().turn%2 === 0){
+			$("#leftResult").text("Wins: "+snapshot.val().player1.wins+" Ties: "+snapshot.val().player1.ties+" Losses: "+snapshot.val().player1.losses);
+			$(".left-images	.RPSimages").css("display", "inline");
+			$(".left-images .RPSimages").css("border", "3px solid red");
+				$(".left-images .RPSimages").hover(function(){
+					$(this).css("border", "3px solid yellow")
+				},function(){
+					$(this).css("border", "");
+				});
+				$(".left-images").delegate(".RPSimages","click",function(){
+					database.ref("inGamePlayers/player1/choice").set($(this).attr("value"));
+					$(".left-images .RPSimages").css("display", "none");
+					$(this).css("display", "inline");
+					database.ref("inGamePlayers/turn").set(parseInt(snapshot.val().turn)+1);
+				})
+			// }		
+		}else{
+			$(".right-images .RPSimages").css("display", "inline");
+			$("#rightResult").text("Wins: "+snapshot.val().player2.wins+" Ties: "+snapshot.val().player2.ties+" Losses: "+snapshot.val().player2.losses);
+			$(".right-images .RPSimages").css("border", "3px solid red");
+			$(".right-images .RPSimages").hover(function(){
+				$(this).css("border", "3px solid yellow")
+			},function(){
+				$(this).css("border", "");
+			});
+
+			$(".right-images").delegate(".RPSimages","click",function(){
+				database.ref("inGamePlayers/player2/choice").set($(this).attr("value"));
+				$(".right-images .RPSimages").css("display", "none");
+				$(this).css("display", "inline");
+				checkWinner(snapshot,$(this).attr("value"));
+
+				database.ref("inGamePlayers/turn").set(parseInt(snapshot.val().turn)+1);
+			})
+		}
+	});
+}
 
 $(document).ready(function(){
 	$(".enter-btn").on("click",function(event){
 		event.preventDefault();
+		var RPSGame;
+
+		var playerName = $("#playerName").val();
+		$("#playerName").val("");
 		$(".entry").remove();
 
 		$(".header").after($('<div class = "row text-center" id = "result">'));
 		$("#result").text("Choose Your Move");
 		var game = $('<div class = "row text-center" id = "game">');
+
 		var leftPlayer = $('<div class = "col-md-6 player" id = "leftPlayer">');
-		var leftPlayerName = $('<div class = "row name">');
-		leftPlayerName.text("You");
-		leftPlayer.append(leftPlayerName)
+		game.append(leftPlayer);
 
 		var rightPlayer = $('<div class = "col-md-6 player" id = "rightPlayer">');
-		var rightPlayerName = $('<div class = "row name">');
-		rightPlayerName.text("Oppenent");
-		rightPlayer.append(rightPlayerName)
-
-		var leftRPSImages = $('<div class = "row left-images">');
-		leftRPSImages.append($('<img class= "RPSimages image-responsive" src="assets/images/rock.png">'))
-		leftRPSImages.append($('<img class= "RPSimages image-responsive" src="assets/images/paper.png">'))
-		leftRPSImages.append($('<img class= "RPSimages image-responsive" src="assets/images/scissors.png">'))
-		leftPlayer.append(leftRPSImages)
-
-		var rightRPSImages = $('<div class = "row left-images">');
-		rightRPSImages.append($('<img class= "RPSimages image-responsive" src="assets/images/rock.png">'))
-		rightRPSImages.append($('<img class= "RPSimages image-responsive" src="assets/images/paper.png">'))
-		rightRPSImages.append($('<img class= "RPSimages image-responsive" src="assets/images/scissors.png">'))
-		rightPlayer.append(rightRPSImages);
-
-		var leftResult = $('<div class = "row" id = "leftResult">');
-		leftResult.text("Wins: 0 Ties: 0 Losses: 0 ");
-		leftPlayer.append(leftResult);
-
-		var rightResult = $('<div class = "row" id = "rightResult">');
-		rightResult.text("Wins: 0 Ties: 0 Losses: 0 ");
-		rightPlayer.append(rightResult);
-
-		game.append(leftPlayer);
 		game.append(rightPlayer);
 		$("#result").after(game);
+
+
+
+		database.ref("inGamePlayers").once("value").then(function(snapshot){
+			if (snapshot.numChildren() === 0){
+				firstPlayerEnter(playerName);
+				database.ref("inGamePlayers/player1").set({
+					name: playerName,
+					wins: 0,
+					losses: 0,
+					ties:0 ,
+					choice: "none"
+
+				});
+			}else if (snapshot.numChildren() === 1){
+				if (snapshot.val().player1 !== null){
+					secondPlayerEnter(playerName);
+					database.ref("inGamePlayers/player2").set({
+						name: playerName,
+						wins: 0,
+						losses: 0,
+						ties: 0,
+						choice: "none"
+					});
+				}else{
+					firstPlayerEnter(playerName);
+					database.ref("inGamePlayers/player1").set({
+						name: playerName,
+						wins: 0,
+						losses: 0,
+						ties:0 ,
+						choice: "none"
+						});	
+				}
+				database.ref("inGamePlayers/turn").set(0);
+			}else{
+				database.ref("queue").set({name: playerName});
+			}
+
+		});
+
 	});
+
+		database.ref("inGamePlayers/turn").on("value",function(snapshot){
+			console.log(snapshot.val());
+			if(snapshot.val() !== null){
+				beginGame();
+			}
+		});
 });
