@@ -83,31 +83,38 @@ function checkWinner(entry){
 		if(entry.val().player1.choice === entry.val().player2.choice){
 			database.ref("inGamePlayers/player1/ties").set(parseInt(entry.val().player1.ties)+1);
 			database.ref("inGamePlayers/player2/ties").set(parseInt(entry.val().player2.ties)+1);
+			$("#result").text("No One Wins! Tie!!");
 
 		}
 		else if (entry.val().player1.choice === "rock" && entry.val().player2.choice === "scissors"){
 			database.ref("inGamePlayers/player1/wins").set(parseInt(entry.val().player1.wins)+1);
 			database.ref("inGamePlayers/player2/losses").set(parseInt(entry.val().player2.losses)+1);
+			$("#result").text("Player 1 Wins! Rock beats Paper!");
 		}
 		else if (entry.val().player1.choice === "rock" && entry.val().player2.choice === "paper"){
 			database.ref("inGamePlayers/player1/losses").set(parseInt(entry.val().player1.losses)+1);
 			database.ref("inGamePlayers/player2/wins").set(parseInt(entry.val().player2.wins)+1);
+			$("#result").text("Player 2 Win! Paper beats Rock!");
 		}
 		else if (entry.val().player1.choice === "scissors" && entry.val().player2.choice === "paper"){
 			database.ref("inGamePlayers/player1/wins").set(parseInt(entry.val().player1.wins)+1);
 			database.ref("inGamePlayers/player2/losses").set(parseInt(entry.val().player2.losses)+1);
+			$("#result").text("Player 1 Wins! Scissors beats Paper!");
 		}
 		else if (entry.val().player1.choice === "scissors" && entry.val().player2.choice === "rock"){
 			database.ref("inGamePlayers/player1/losses").set(parseInt(entry.val().player1.losses)+1);
 			database.ref("inGamePlayers/player2/wins").set(parseInt(entry.val().player2.wins)+1);
+			$("#result").text("Player 2 Win! Rock beats Scissors!");
 		}
 		else if (entry.val().player1.choice === "paper" && entry.val().player2.choice === "rock"){
 			database.ref("inGamePlayers/player1/wins").set(parseInt(entry.val().player1.wins)+1);
 			database.ref("inGamePlayers/player2/losses").set(parseInt(entry.val().player2.losses)+1);
+			$("#result").text("Player 1 Wins! Paper beats Rock!");
 		}
 		else if (entry.val().player1.choice === "paper" && entry.val().player2.choice === "scissors"){
 			database.ref("inGamePlayers/player1/losses").set(parseInt(entry.val().player1.losses)+1);
 			database.ref("inGamePlayers/player2/wins").set(parseInt(entry.val().player2.wins)+1);
+			$("#result").text("Player 2 Wins! Scissors beats Paper!");
 		}
 }
 
@@ -172,9 +179,12 @@ function beginGame(){
 }
 
 $(document).ready(function(){
+
 	$(".enter-btn").on("click",function(event){
 		event.preventDefault();
 		var RPSGame;
+
+
 
 		var playerName = $("#playerName").val();
 		$("#playerName").val("");
@@ -205,6 +215,7 @@ $(document).ready(function(){
 					choice: "none"
 
 				});
+				$(".chat").css("display","block")
 			}else if (snapshot.numChildren() === 1){
 				if (snapshot.val().player1 !== null){
 					playerSide = "right";
@@ -229,6 +240,7 @@ $(document).ready(function(){
 					});	
 
 				}
+				$(".chat").css("display","block")
 				database.ref("inGamePlayers/turn").set(0);
 			}else{
 				// Eventually plan to move player from queue to inGame when one disconnects
@@ -239,8 +251,40 @@ $(document).ready(function(){
 
 	});
 
+	$(".send-msg").on("click", function(event){
+		event.preventDefault();
+
+		var input = $("#inputBox").val();
+		$("#inputBox").val("");
+		if (playerSide === "left"){
+			database.ref("chatWindow").set({"playerSide": "left", input: input});
+		}else{
+			database.ref("chatWindow").set({"playerSide": "right",input: input});
+		}
+
+
+
+	});
+
+	database.ref("chatWindow").on("value",function(snapshot){
+		console.log(snapshot.val())
+		if(snapshot.val() !== null){
+			if(snapshot.val() !== null){
+		if (snapshot.val().playerSide === playerSide){
+			var line = $("<p class = 'text-right' style = 'color:green'>").text(snapshot.val().input);
+			$(".chatbox").append(line);
+		}else{
+			var line = $("<p class = 'text-left' style = 'color: red'>").text(snapshot.val().input);
+			$(".chatbox").append(line);
+		}
+		database.ref("chatWindow").remove();
+	}
+	}
+
+
+	})
+
 		database.ref("inGamePlayers/turn").on("value",function(snapshot){
-			console.log(snapshot.val());
 			if(snapshot.val() !== null){
 				database.ref("inGamePlayers").once("value").then(function(parentSnapshot){
 				$("#rightName").text(parentSnapshot.val().player2.name);
@@ -259,8 +303,15 @@ $(document).ready(function(){
 						// $(this).css("display","none");
 					})
 					setTimeout(function(){
-						beginGame();
+						$("#result").text("Choose Your Move")
 						$(".RPSimages").css("display","none");
+						if (playerSide === "right"){
+							$(".right-images .RPSimages").css("display","inline");
+						}else{
+							$(".left-images .RPSimages").css("display","inline");
+						}
+						beginGame();
+						
 				},3000);
 
 				}else{

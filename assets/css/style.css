@@ -1,7 +1,17 @@
 .header{
 	background-color: blue;
-	margin-bottom: 50px;
+	margin-bottom: 30px;
 	color: white;
+}
+body{
+	height: 100%;
+	background-image: url("../images/RPSBackground.jpg");
+	background-repeat: no-repeat;
+	background-size: cover;
+	background-attachment: fixed;
+/*	color: white;
+	margin: 0;
+	font-size: 20px;*/
 }
 #playerName{
 	margin-bottom: 5px;
@@ -13,13 +23,27 @@
 }
 .player{
 	border: solid black 5px;
-	min-height: 500px;
+	min-height: 425px;
 }
 .name{
 	font-weight: bold;
 	font-size: 26px;
-	margin-bottom: 35px;
+	margin-bottom: 10px;
 }
 .RPSimages{
-	width: 250px;
+	width: 200px;
+}
+.chatbox{
+	margin-top: 5px;
+	background-color: white;
+	border: solid black 5px;
+	color: black;
+	height: 200px;
+	overflow-y: auto;
+}
+.chat{
+	display: none;
+}
+.box{
+	margin-bottom: 30px;
 }
