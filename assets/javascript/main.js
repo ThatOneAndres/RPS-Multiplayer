@@ -18,9 +18,9 @@ function firstPlayerEnter(playerName){
 	$("#leftPlayer").append(leftPlayerName)
 
 	var leftRPSImages = $('<div class = "row left-images">');
-	leftRPSImages.append($('<img class= "RPSimages image-responsive" value = "rock" src="assets/images/rock.png">'))
-	leftRPSImages.append($('<img class= "RPSimages image-responsive" value = "paper" src="assets/images/paper.png">'))
-	leftRPSImages.append($('<img class= "RPSimages image-responsive" value = "scissors" src="assets/images/scissors.png">'))
+	leftRPSImages.append($('<img class= "RPSimages image-responsive rock" value = "rock" src="assets/images/rock.png">'))
+	leftRPSImages.append($('<img class= "RPSimages image-responsive paper" value = "paper" src="assets/images/paper.png">'))
+	leftRPSImages.append($('<img class= "RPSimages image-responsive scissors" value = "scissors" src="assets/images/scissors.png">'))
 	$("#leftPlayer").append(leftRPSImages)
 
 	var leftResult = $('<div class = "row" id = "leftResult">');
@@ -32,9 +32,9 @@ function firstPlayerEnter(playerName){
 	$("#rightPlayer").append(rightPlayerName);
 
 	var rightRPSImages = $('<div class = "row right-images">');
-	rightRPSImages.append($('<img class= "RPSimages image-responsive" style = "display: none" value = "rock" src="assets/images/rock.png">'))
-	rightRPSImages.append($('<img class= "RPSimages image-responsive" style = "display: none" value = "paper" src="assets/images/paper.png">'))
-	rightRPSImages.append($('<img class= "RPSimages image-responsive" style = "display: none" value = "scissors" src="assets/images/scissors.png">'))
+	rightRPSImages.append($('<img class= "RPSimages image-responsive rock" style = "display: none" value = "rock" src="assets/images/rock.png">'))
+	rightRPSImages.append($('<img class= "RPSimages image-responsive paper" style = "display: none" value = "paper" src="assets/images/paper.png">'))
+	rightRPSImages.append($('<img class= "RPSimages image-responsive scissors" style = "display: none" value = "scissors" src="assets/images/scissors.png">'))
 	$("#rightPlayer").append(rightRPSImages);
 
 	var rightResult = $('<div class = "row" style = "display: none" id = "rightResult">');
@@ -49,9 +49,9 @@ function secondPlayerEnter(playerName){
 	$("#rightPlayer").append(rightPlayerName)
 
 	var rightRPSImages = $('<div class = "row right-images">');
-	rightRPSImages.append($('<img class= "RPSimages image-responsive" value = "rock" src="assets/images/rock.png">'))
-	rightRPSImages.append($('<img class= "RPSimages image-responsive" value = "paper" src="assets/images/paper.png">'))
-	rightRPSImages.append($('<img class= "RPSimages image-responsive" value = "scissors" src="assets/images/scissors.png">'))
+	rightRPSImages.append($('<img class= "RPSimages image-responsive rock" value = "rock" src="assets/images/rock.png">'))
+	rightRPSImages.append($('<img class= "RPSimages image-responsive paper" value = "paper" src="assets/images/paper.png">'))
+	rightRPSImages.append($('<img class= "RPSimages image-responsive scissors" value = "scissors" src="assets/images/scissors.png">'))
 	$("#rightPlayer").append(rightRPSImages);
 
 	var rightResult = $('<div class = "row" id = "rightResult">');
@@ -63,9 +63,9 @@ function secondPlayerEnter(playerName){
 	$("#leftPlayer").append(leftPlayerName);
 
 	var leftRPSImages = $('<div class = "row left-images">');
-	leftRPSImages.append($('<img class= "RPSimages image-responsive" style = "display: none" value = "rock" src="assets/images/rock.png">'))
-	leftRPSImages.append($('<img class= "RPSimages image-responsive" style = "display: none" value = "paper" src="assets/images/paper.png">'))
-	leftRPSImages.append($('<img class= "RPSimages image-responsive" style = "display: none" value = "scissors" src="assets/images/scissors.png">'))
+	leftRPSImages.append($('<img class= "RPSimages image-responsive rock" style = "display: none" value = "rock" src="assets/images/rock.png">'))
+	leftRPSImages.append($('<img class= "RPSimages image-responsive paper" style = "display: none" value = "paper" src="assets/images/paper.png">'))
+	leftRPSImages.append($('<img class= "RPSimages image-responsive scissors" style = "display: none" value = "scissors" src="assets/images/scissors.png">'))
 	$("#leftPlayer").append(leftRPSImages);
 
 	var leftResult = $('<div class = "row" style = "display: none" id = "leftResult">');
@@ -78,37 +78,34 @@ function updateResult(){
 
 }  
 
-function checkWinner(entry,player2Choice){
-	console.log("HERE");
-		console.log(entry.val().player1.choice)
-		console.log(player2Choice)
+function checkWinner(entry){
 
-		if(entry.val().player1.choice === player2Choice){
+		if(entry.val().player1.choice === entry.val().player2.choice){
 			database.ref("inGamePlayers/player1/ties").set(parseInt(entry.val().player1.ties)+1);
 			database.ref("inGamePlayers/player2/ties").set(parseInt(entry.val().player2.ties)+1);
 
 		}
-		else if (entry.val().player1.choice === "rock" && player2Choice === "scissors"){
+		else if (entry.val().player1.choice === "rock" && entry.val().player2.choice === "scissors"){
 			database.ref("inGamePlayers/player1/wins").set(parseInt(entry.val().player1.wins)+1);
 			database.ref("inGamePlayers/player2/losses").set(parseInt(entry.val().player2.losses)+1);
 		}
-		else if (entry.val().player1.choice === "rock" && player2Choice === "paper"){
+		else if (entry.val().player1.choice === "rock" && entry.val().player2.choice === "paper"){
 			database.ref("inGamePlayers/player1/losses").set(parseInt(entry.val().player1.losses)+1);
 			database.ref("inGamePlayers/player2/wins").set(parseInt(entry.val().player2.wins)+1);
 		}
-		else if (entry.val().player1.choice === "scissors" && player2Choice === "paper"){
+		else if (entry.val().player1.choice === "scissors" && entry.val().player2.choice === "paper"){
 			database.ref("inGamePlayers/player1/wins").set(parseInt(entry.val().player1.wins)+1);
 			database.ref("inGamePlayers/player2/losses").set(parseInt(entry.val().player2.losses)+1);
 		}
-		else if (entry.val().player1.choice === "scissors" && player2Choice === "rock"){
+		else if (entry.val().player1.choice === "scissors" && entry.val().player2.choice === "rock"){
 			database.ref("inGamePlayers/player1/losses").set(parseInt(entry.val().player1.losses)+1);
 			database.ref("inGamePlayers/player2/wins").set(parseInt(entry.val().player2.wins)+1);
 		}
-		else if (entry.val().player1.choice === "paper" && player2Choice === "rock"){
+		else if (entry.val().player1.choice === "paper" && entry.val().player2.choice === "rock"){
 			database.ref("inGamePlayers/player1/wins").set(parseInt(entry.val().player1.wins)+1);
 			database.ref("inGamePlayers/player2/losses").set(parseInt(entry.val().player2.losses)+1);
 		}
-		else if (entry.val().player1.choice === "paper" && player2Choice === "scissors"){
+		else if (entry.val().player1.choice === "paper" && entry.val().player2.choice === "scissors"){
 			database.ref("inGamePlayers/player1/losses").set(parseInt(entry.val().player1.losses)+1);
 			database.ref("inGamePlayers/player2/wins").set(parseInt(entry.val().player2.wins)+1);
 		}
@@ -129,6 +126,7 @@ function beginGame(){
 					$(this).css("border", "");
 				});
 				$(".left-images").delegate(".RPSimages","click",function(){
+					$(".left-images .RPSimages").off('hover');
 					database.ref("inGamePlayers/player1/choice").set($(this).attr("value"));
 					$("#leftPlayer").css("border", "5px solid black");
 					$(".left-images .RPSimages").css("display", "none");
@@ -149,20 +147,23 @@ function beginGame(){
 			}
 
 			$(".right-images").delegate(".RPSimages","click",function(){
+				$(".right-images .RPSimages").off('hover');
 				database.ref("inGamePlayers/player2/choice").set($(this).attr("value"));
 				$("#rightPlayer").css("border", "5px solid black");
 				$(".right-images .RPSimages").css("display", "none");
-				// $(this).css("display", "inline");
-				setTimeout(function(){
-					database.ref("inGamePlayers").once("value").then(function(newSnapshot){
-						console.log(newSnapshot.val());
-						$(".right-images .RPSimages [value ='" + newSnapshot.val().player2.choice+"']").css("display", "inline");
 
-						checkWinner(snapshot,newSnapshot.val().player2.choice);
-						$(this).css("display","none");
-						database.ref("inGamePlayers/turn").set(parseInt(snapshot.val().turn)+1);
-					})
-				},3000);
+				database.ref("inGamePlayers/turn").set(parseInt(snapshot.val().turn)+1);
+				// $(this).css("display", "inline");
+				// setTimeout(function(){
+				// 	database.ref("inGamePlayers").once("value").then(function(newSnapshot){
+				// 		console.log(newSnapshot.val());
+				// 		$(".right-images .RPSimages [value ='" + newSnapshot.val().player2.choice+"']").css("display", "inline");
+
+				// 		checkWinner(snapshot,newSnapshot.val().player2.choice);
+				// 		$(this).css("display","none");
+
+				// 	})
+				// },3000);
 				
 
 			})
@@ -247,7 +248,24 @@ $(document).ready(function(){
 				$("#leftResult").css("display","inline");
 				$("#rightResult").css("display","inline");
 			});
-				beginGame();
+				if (snapshot.val()%2 === 0 && snapshot.val() > 0){
+					database.ref("inGamePlayers").once("value").then(function(newSnapshot){
+						console.log(newSnapshot.val());
+						var leftImagePath = ".left-images ." + newSnapshot.val().player1.choice;
+						$(leftImagePath).css("display", "inline");
+						var rightImagePath = ".right-images ." + newSnapshot.val().player2.choice;
+						$(rightImagePath).css("display", "inline");
+						checkWinner(newSnapshot);
+						// $(this).css("display","none");
+					})
+					setTimeout(function(){
+						beginGame();
+						$(".RPSimages").css("display","none");
+				},3000);
+
+				}else{
+					beginGame();
+				}
 			}
 		});
 
