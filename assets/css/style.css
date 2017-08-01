@@ -11,7 +11,9 @@ body{
 	background-attachment: fixed;
 /*	color: white;
 	margin: 0;
-	font-size: 20px;*/
+	*/
+/*	font-size: 20px;*/
+	font-weight: bold;
 }
 #playerName{
 	margin-bottom: 5px;
