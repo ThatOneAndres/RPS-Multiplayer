@@ -11,6 +11,8 @@
   var playerSide;
   var database = firebase.database();
   // database.ref("inGamePlayers").set({isCalculating: false});
+
+// Sets page for leftSidePlayer
 function firstPlayerEnter(playerName){
 
 	var leftPlayerName = $('<div class = "row name" id = "leftName">');
@@ -41,7 +43,7 @@ function firstPlayerEnter(playerName){
 	rightResult.text("Wins: 0 Ties: 0 Losses: 0 ");
 	$("#rightPlayer").append(rightResult);
 }
-
+// Sets page for right side player
 function secondPlayerEnter(playerName){
 
 	var rightPlayerName = $('<div class = "row name" id = "rightName">');
@@ -74,10 +76,7 @@ function secondPlayerEnter(playerName){
 
 }
 
-function updateResult(){
-
-}  
-
+// Checks who won the rock paper scissor match
 function checkWinner(entry){
 
 		if(entry.val().player1.choice === entry.val().player2.choice){
@@ -118,12 +117,15 @@ function checkWinner(entry){
 		}
 }
 
+// Begins match, uses turn found in inGamePlayers to know who's turn it is
 function beginGame(){
 	console.log("beginGame");
 	database.ref("inGamePlayers").once("value").then(function(snapshot){
+		// if player turn even number it is left players turn
 		if (snapshot.val().turn%2 === 0){
 			$("#leftResult").text("Wins: "+snapshot.val().player1.wins+" Ties: "+snapshot.val().player1.ties+" Losses: "+snapshot.val().player1.losses);
 			$("#rightResult").text("Wins: "+snapshot.val().player2.wins+" Ties: "+snapshot.val().player2.ties+" Losses: "+snapshot.val().player2.losses);
+			$(".right-images").off("click");
 			if (playerSide === "left"){
 			$(".left-images	.RPSimages").css("display", "inline");
 			$("#leftPlayer").css("border", "5px solid blue");
@@ -141,18 +143,20 @@ function beginGame(){
 					database.ref("inGamePlayers/turn").set(parseInt(snapshot.val().turn)+1);
 				})
 			}
-			// }		
+			// right players turn		
 		}else{
 			if (playerSide === "right"){
 			$(".right-images .RPSimages").css("display", "inline");
 			$("#rightPlayer").css("border", "5px solid blue");
+			// Prevents left player from being able to choose rock paper scissors
+			$(".left-images").off("click");
 			$(".right-images .RPSimages").hover(function(){
 				$(this).css("border", "3px solid yellow")
 			},function(){
 				$(this).css("border", "");
 			});
 			}
-
+			// Enables images to be clickable
 			$(".right-images").delegate(".RPSimages","click",function(){
 				$(".right-images .RPSimages").off('hover');
 				database.ref("inGamePlayers/player2/choice").set($(this).attr("value"));
@@ -160,19 +164,6 @@ function beginGame(){
 				$(".right-images .RPSimages").css("display", "none");
 
 				database.ref("inGamePlayers/turn").set(parseInt(snapshot.val().turn)+1);
-				// $(this).css("display", "inline");
-				// setTimeout(function(){
-				// 	database.ref("inGamePlayers").once("value").then(function(newSnapshot){
-				// 		console.log(newSnapshot.val());
-				// 		$(".right-images .RPSimages [value ='" + newSnapshot.val().player2.choice+"']").css("display", "inline");
-
-				// 		checkWinner(snapshot,newSnapshot.val().player2.choice);
-				// 		$(this).css("display","none");
-
-				// 	})
-				// },3000);
-				
-
 			})
 		}
 	});
@@ -204,6 +195,7 @@ $(document).ready(function(){
 
 
 		database.ref("inGamePlayers").once("value").then(function(snapshot){
+			// if else if to check the number of players currently playing
 			if (snapshot.numChildren() === 0){
 				playerSide = "left";
 				firstPlayerEnter(playerName);
@@ -250,7 +242,7 @@ $(document).ready(function(){
 		});
 
 	});
-
+	// Sends messages to chat box.
 	$(".send-msg").on("click", function(event){
 		event.preventDefault();
 
@@ -283,42 +275,43 @@ $(document).ready(function(){
 
 
 	})
-
-		database.ref("inGamePlayers/turn").on("value",function(snapshot){
-			if(snapshot.val() !== null){
-				database.ref("inGamePlayers").once("value").then(function(parentSnapshot){
-				$("#rightName").text(parentSnapshot.val().player2.name);
-				$("#leftName").text(parentSnapshot.val().player1.name);
-				$("#leftResult").css("display","inline");
-				$("#rightResult").css("display","inline");
-			});
-				if (snapshot.val()%2 === 0 && snapshot.val() > 0){
-					database.ref("inGamePlayers").once("value").then(function(newSnapshot){
-						console.log(newSnapshot.val());
-						var leftImagePath = ".left-images ." + newSnapshot.val().player1.choice;
-						$(leftImagePath).css("display", "inline");
-						var rightImagePath = ".right-images ." + newSnapshot.val().player2.choice;
-						$(rightImagePath).css("display", "inline");
-						checkWinner(newSnapshot);
-						// $(this).css("display","none");
-					})
-					setTimeout(function(){
-						$("#result").text("Choose Your Move")
-						$(".RPSimages").css("display","none");
-						if (playerSide === "right"){
-							$(".right-images .RPSimages").css("display","inline");
-						}else{
-							$(".left-images .RPSimages").css("display","inline");
-						}
-						beginGame();
-						
-				},3000);
-
-				}else{
-					beginGame();
-				}
-			}
+	// Logic here will affect both players
+	database.ref("inGamePlayers/turn").on("value",function(snapshot){
+		// Check if both players are in match
+		if(snapshot.val() !== null){
+			database.ref("inGamePlayers").once("value").then(function(parentSnapshot){
+			$("#rightName").text(parentSnapshot.val().player2.name);
+			$("#leftName").text(parentSnapshot.val().player1.name);
+			$("#leftResult").css("display","inline");
+			$("#rightResult").css("display","inline");
 		});
+			if (snapshot.val()%2 === 0 && snapshot.val() > 0){
+				database.ref("inGamePlayers").once("value").then(function(newSnapshot){
+					console.log(newSnapshot.val());
+					var leftImagePath = ".left-images ." + newSnapshot.val().player1.choice;
+					$(leftImagePath).css("display", "inline");
+					var rightImagePath = ".right-images ." + newSnapshot.val().player2.choice;
+					$(rightImagePath).css("display", "inline");
+					checkWinner(newSnapshot);
+					// $(this).css("display","none");
+				})
+				setTimeout(function(){
+					$("#result").text("Choose Your Move")
+					$(".RPSimages").css("display","none");
+					if (playerSide === "right"){
+						$(".right-images .RPSimages").css("display","inline");
+					}else{
+						$(".left-images .RPSimages").css("display","inline");
+					}
+					beginGame();
+					
+			},3000);
+
+			}else{
+				beginGame();
+			}
+		}
+	});
 
 	database.ref("inGamePlayers").onDisconnect().remove();
 });
