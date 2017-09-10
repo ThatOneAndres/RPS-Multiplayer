@@ -8,7 +8,7 @@
     messagingSenderId: "1009660396441"
   };
   firebase.initializeApp(config);
-  var playerSide;
+  var playerSide; // used to know if player is left or right
   var database = firebase.database();
   // database.ref("inGamePlayers").set({isCalculating: false});
 
@@ -175,8 +175,6 @@ $(document).ready(function(){
 		event.preventDefault();
 		var RPSGame;
 
-
-
 		var playerName = $("#playerName").val();
 		$("#playerName").val("");
 		$(".entry").remove();
@@ -192,14 +190,12 @@ $(document).ready(function(){
 		game.append(rightPlayer);
 		$("#result").after(game);
 
-
-
 		database.ref("inGamePlayers").once("value").then(function(snapshot){
 			// if else if to check the number of players currently playing
 			if (snapshot.numChildren() === 0){
 				playerSide = "left";
 				firstPlayerEnter(playerName);
-				database.ref("inGamePlayers/player1").set({
+				var p1 = database.ref("inGamePlayers/player1").set({
 					name: playerName,
 					wins: 0,
 					losses: 0,
@@ -207,36 +203,41 @@ $(document).ready(function(){
 					choice: "none"
 
 				});
-				$(".chat").css("display","block")
+				database.ref("inGamePlayers/player1").onDisconnect().remove().then(function(data){
+					console.log(data);
+				});
+				$(".chat").css("display","block");
 			}else if (snapshot.numChildren() === 1){
 				if (snapshot.val().player1 !== null){
 					playerSide = "right";
 					secondPlayerEnter(playerName);
-					database.ref("inGamePlayers/player2").set({
+					var p2 = database.ref("inGamePlayers/player2").set({
 						name: playerName,
 						wins: 0,
 						losses: 0,
 						ties: 0,
 						choice: "none"
 					});
-					
+					database.ref("inGamePlayers/player2").onDisconnect().remove();
 				}else{
 					playerSide = "left";
 					firstPlayerEnter(playerName);
-					database.ref("inGamePlayers/player1").set({
+					var p1 = database.ref("inGamePlayers/player1").set({
 						name: playerName,
 						wins: 0,
 						losses: 0,
 						ties:0 ,
 						choice: "none"
 					});	
-
+					database.ref("inGamePlayers/player1").onDisconnect().remove();
 				}
 				$(".chat").css("display","block")
 				database.ref("inGamePlayers/turn").set(0);
 			}else{
 				// Eventually plan to move player from queue to inGame when one disconnects
-				database.ref("queue").set({name: playerName});
+				playerSide = "queue";
+				var q = database.ref("queue").set({name: playerName});
+				database.ref("queue").onDisconnect().remove();
 			}
 
 		});
@@ -259,7 +260,6 @@ $(document).ready(function(){
 	});
 
 	database.ref("chatWindow").on("value",function(snapshot){
-		console.log(snapshot.val())
 		if(snapshot.val() !== null){
 			if(snapshot.val() !== null){
 		if (snapshot.val().playerSide === playerSide){
@@ -270,11 +270,10 @@ $(document).ready(function(){
 			$(".chatbox").append(line);
 		}
 		database.ref("chatWindow").remove();
-	}
-	}
-
-
+			}
+		}
 	})
+
 	// Logic here will affect both players
 	database.ref("inGamePlayers/turn").on("value",function(snapshot){
 		// Check if both players are in match
@@ -287,7 +286,6 @@ $(document).ready(function(){
 		});
 			if (snapshot.val()%2 === 0 && snapshot.val() > 0){
 				database.ref("inGamePlayers").once("value").then(function(newSnapshot){
-					console.log(newSnapshot.val());
 					var leftImagePath = ".left-images ." + newSnapshot.val().player1.choice;
 					$(leftImagePath).css("display", "inline");
 					var rightImagePath = ".right-images ." + newSnapshot.val().player2.choice;
@@ -312,6 +310,33 @@ $(document).ready(function(){
 			}
 		}
 	});
-
-	database.ref("inGamePlayers").onDisconnect().remove();
+	database.ref("inGamePlayers").on("child_removed",function(snapshot){
+		database.ref("queue").once("value").then(function(newSnapshot){
+			database.ref("inGamePlayers").once("value").then(function(newerSnapshot){
+				console.log(newerSnapshot.numChildren());
+				if (newerSnapshot.numChildren() === 1 && newSnapshot.numChildren() === 0){
+				database.ref().remove();
+			}
+			})
+			if (newSnapshot.numChildren() > 0){
+				if (snapshot.val().player1 === null){
+					database.ref("inGamePlayers/player1").set({
+					name: newSnapshot.val().name,
+					wins: 0,
+					losses: 0,
+					ties:0 ,
+					choice: "none"
+					});
+				}else{
+					database.ref("inGamePlayers/player2").set({
+					name: newSnapshot.val().name,
+					wins: 0,
+					losses: 0,
+					ties:0 ,
+					choice: "none"
+					});
+				}
+			}
+		})
+	});
 });
